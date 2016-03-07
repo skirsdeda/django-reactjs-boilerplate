@@ -1,26 +1,36 @@
-# Step 1: Create your Django project
+# Step 2: Add non-reactJS views
 
-Ok. So you decided you want to use ReactJS with your new or existing Django
-project. That's super cool. Since we don't have a project at hand, let's just
-create a new one:
+We want to show that reactJS can easily be used with an existing project, so
+we will add a few "legacy-views" to simulate that this is an old existing
+Django project.
 
-```bash
-mkvirtualenv djreact
-pip install Django
-django-admin startproject djreact
-mv djreact django
+I added the following lines to `urls.py`:
+
+```python
+from django.views import generic
+
+urlpatterns = [
+  url(r'^admin/', admin.site.urls),
+  url(r'^view2/',
+      generic.TemplateView.as_view(template_name='view2.html')),
+  url(r'^$',
+      generic.TemplateView.as_view(template_name='view1.html')),
+]
 ```
 
-This creates a new Django project in the root folder of your repository. I like
-to rename that folder to `django` just because it will sit besides other
-folders like `ansible` and maybe even `react-native`. I like the root folders
-to describe the main technology that is used within them.
+Next, I added a few templates to the `templates` folder and finally I made sure
+that Django is aware of these templates by putting this into `settings.py`:
 
-You also want to create a `requirements.txt` file and put `Django==1.9.3`
-inside.
+```python
+TEMPLATES = [
+    {
+        ...
+        'DIRS': [os.path.join(BASE_DIR, 'djreact/templates')],
+        ...
+    },
+]
+```
 
-And finally we should create a `.gitignore` file and add `*.pyc` files and
-`db.sqlite3`.
-
-At this point, you can run `./manage.py runserver` and you should see the
-Django welcome page in your browser.
+At this point you can run `./manage.py runserver` and you should see "View 1"
+in your browser. You can change the URL to `/view2/` and you should see
+"View 2".
