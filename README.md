@@ -1,65 +1,158 @@
-# Step 5: Hot Reloading
+# Step 6: Going to production
 
-Step 4 was nice and awesome, but not mind-blowing. Let's do mind-blowing now.
-We don't really want to run that `webpack` command every time we change our
-ReactJS app (and create thousands of local bundles in the process). We want to
-see the changes in the browser immediately.
+There are probably a hundred ways to achieve what we want to do in this step.
+You can take my approach as a suggestion or just apply whatever works best
+for your case.
 
-First, we need a `server.js` file that will start a webpack-dev-server for us:
+One way would be to install all the node dependencies on your server and make
+sure that during each deployment you generate the bundles and then call
+`collectstatic`.
+
+I prefer to do keep my servers as simple as possible and generate the bundles
+locally and commit them to the repository.
+
+Let's assume a typical 2-tier environment where we have a staging server and a
+production server. Let's assume that both servers have different URLs, so the
+API endpoints on staging all start with `https://sandbox.example.com/api/v1/`
+and the ones on production start with `https://example.com/api/v1`. You need to
+hard-code these values into your bundles, because that's what your user's
+browsers will download and execute.
+
+We need to create a new `webpack.stage.config.js` file and it looks like this:
 
 ```javascript
 var webpack = require('webpack')
-var WebpackDevServer = require('webpack-dev-server')
-var config = require('./webpack.local.config')
+var BundleTracker = require('webpack-bundle-tracker')
 
-new WebpackDevServer(webpack(config), {
-  publicPath: config.output.publicPath,
-  hot: true,
-  inline: true,
-  historyApiFallback: true,
-}).listen(3000, config.ip, function (err, result) {
-  if (err) {
-    console.log(err)
-  }
+var config = require('./webpack.base.config.js')
 
-  console.log('Listening at ' + config.ip + ':3000')
-})
+config.output.path = require('path').resolve('./djreact/static/bundles/stage/')
+
+config.plugins = config.plugins.concat([
+  new BundleTracker({filename: './webpack-stats-stage.json'}),
+
+  // removes a lot of debugging code in React
+  new webpack.DefinePlugin({
+    'process.env': {
+      'NODE_ENV': JSON.stringify('staging'),
+      'BASE_API_URL': JSON.stringify('https://sandbox.example.com/api/v1/'),
+  }}),
+
+  // keeps hashes consistent between compilations
+  new webpack.optimize.OccurenceOrderPlugin(),
+
+  // minifies your code
+  new webpack.optimize.UglifyJsPlugin({
+    compressor: {
+      warnings: false
+    }
+  })
+])
+
+// Add a loader for JSX files
+config.module.loaders.push(
+  { test: /\.jsx?$/, exclude: /node_modules/, loader: 'babel' }
+)
+
+module.exports = config
 ```
 
-Next, we need to add/replace the following in our `webpack.local.config.js`:
+And likewise, we need to add `webpack.prod.config.js` and it looks like this:
 
 ```javascript
-var ip = 'localhost'
+var webpack = require('webpack')
+var BundleTracker = require('webpack-bundle-tracker')
 
-config.entry = {
-  App1: [
-    'webpack-dev-server/client?http://' + ip + ':3000',
-    'webpack/hot/only-dev-server',
-    './reactjs/App1',
-  ],
-}
+var config = require('./webpack.base.config.js')
 
-config.output.publicPath = 'http://' + ip + ':3000' + '/assets/bundles/'
+config.output.path = require('path').resolve('./djreact/static/bundles/prod/')
 
+config.plugins = config.plugins.concat([
+  new BundleTracker({filename: './webpack-stats-prod.json'}),
+
+  // removes a lot of debugging code in React
+  new webpack.DefinePlugin({
+    'process.env': {
+      'NODE_ENV': JSON.stringify('production'),
+      'BASE_API_URL': JSON.stringify('https://example.com/api/v1/'),
+  }}),
+
+  // keeps hashes consistent between compilations
+  new webpack.optimize.OccurenceOrderPlugin(),
+
+  // minifies your code
+  new webpack.optimize.UglifyJsPlugin({
+    compressor: {
+      warnings: false
+    }
+  })
+])
+
+// Add a loader for JSX files
+config.module.loaders.push(
+  { test: /\.jsx?$/, exclude: /node_modules/, loader: 'babel' }
+)
+
+module.exports = config
+```
+
+And because we are now using the `DefinePlugin` to add environment variables,
+we should update our `webpack.local.config.js` like this:
+
+```javascript
 config.plugins = config.plugins.concat([
   new webpack.HotModuleReplacementPlugin(),
   new webpack.NoErrorsPlugin(),
   new BundleTracker({filename: './webpack-stats-local.json'}),
+  new webpack.DefinePlugin({
+    'process.env': {
+      'NODE_ENV': JSON.stringify('development'),
+      'BASE_API_URL': JSON.stringify('https://'+ ip +':8000/api/v1/'),
+  }}),
 ])
 ```
 
-Ready? In one terminal window, start the webpack-dev-server with
-`node server.js` and in another terminal window, start the Django devserver
-with `./manage.py runserver`.
+We can now create stage and prod bundles like this:
 
-Make sure that you can still see "Something New!".
+```bash
+node_modules/.bin/webpack --config webpack.stage.config.js
+node_modules/.bin/webpack --config webpack.prod.config.js
+```
 
-And now change it to `Something Fancy!` in `containers/App1Container.jsx` and
-switch back to your browser. If you are very fast, you can see how it updates
-itself.
+For us lazy programmers, that's really too much typing, so let's put that into
+a script. Run `pip install Fabric` and add it to `requirements.txt`.
 
-There is another cool thing: When you open the site in Google Chrome and open
-the developer tools with `COMMAND+OPTION+i` and then open the `Sources` tab,
-you can see `webpack://` in the sidebar. It has a folder called `.` where you
-will find the original ReactJS sources. You can even put breakpoints here and
-debug your app like a pro. No more `console.log()` in your JavaScript code.
+Then add the following `fabfile.py`:
+
+```python
+from fabric.api import local
+
+def webpack():
+    local('rm -rf djreact/static/bundles/stage/*')
+    local('rm -rf djreact/static/bundles/prod/*')
+    local('webpack --config webpack.stage.config.js --progress --colors')
+    local('webpack --config webpack.prod.config.js --progress --colors')
+```
+
+Your workflow will now look like this:
+
+1. Start `./manage.py runserver`
+1. Start `node server.js`
+1. Edit your ReactJS app
+1. When done, commit your changes
+1. Run `fab webpack` and commit your new bundles
+1. Run a deployment
+
+On your servers, you will need a `local_settings.py` where you override the
+`WEBPACK_LOADER` setting like this:
+
+```python
+WEBPACK_LOADER = {
+    'DEFAULT': {
+        'BUNDLE_DIR_NAME': 'bundles/stage/',  # end with slash
+        'STATS_FILE': os.path.join(BASE_DIR, 'webpack-stats-stage.json'),
+    }
+}
+```
+
+And similar for prod, of course, just replace `stage` with `prod`.
