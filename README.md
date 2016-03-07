@@ -19,7 +19,8 @@ to describe the main technology that is used within them.
 You also want to create a `requirements.txt` file and put `Django==1.9.3`
 inside.
 
-And finally we should create a `.gitignore` file and add `*.pyc` files.
+And finally we should create a `.gitignore` file and add `*.pyc` files and
+`db.sqlite3`.
 
 At this point, you can run `./manage.py runserver` and you should see the
 Django welcome page in your browser.
