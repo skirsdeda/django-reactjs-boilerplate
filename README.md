@@ -1,48 +1,65 @@
-# Step 4: Use the bundle
+# Step 5: Hot Reloading
 
-In the last step we have create our first bundle, but we haven't seen the result
-in the browser. Let's update our template to use our fancy new ReactJS app now.
+Step 4 was nice and awesome, but not mind-blowing. Let's do mind-blowing now.
+We don't really want to run that `webpack` command every time we change our
+ReactJS app (and create thousands of local bundles in the process). We want to
+see the changes in the browser immediately.
 
-Change `view1.html` so that it looks like this:
+First, we need a `server.js` file that will start a webpack-dev-server for us:
 
-```html
-{% extends "base.html" %}
-{% load render_bundle from webpack_loader %}
+```javascript
+var webpack = require('webpack')
+var WebpackDevServer = require('webpack-dev-server')
+var config = require('./webpack.local.config')
 
-{% block main %}
-<div id="App1"></div>
-{% render_bundle 'vendors' %}
-{% render_bundle 'App1' %}
-{% endblock %}
+new WebpackDevServer(webpack(config), {
+  publicPath: config.output.publicPath,
+  hot: true,
+  inline: true,
+  historyApiFallback: true,
+}).listen(3000, config.ip, function (err, result) {
+  if (err) {
+    console.log(err)
+  }
+
+  console.log('Listening at ' + config.ip + ':3000')
+})
 ```
 
-We also need to add a new setting to `settings.py`:
+Next, we need to add/replace the following in our `webpack.local.config.js`:
 
-```python
-WEBPACK_LOADER = {
-    'DEFAULT': {
-        'BUNDLE_DIR_NAME': 'bundles/local/',  # end with slash
-        'STATS_FILE': os.path.join(BASE_DIR, 'webpack-stats-local.json'),
-    }
+```javascript
+var ip = 'localhost'
+
+config.entry = {
+  App1: [
+    'webpack-dev-server/client?http://' + ip + ':3000',
+    'webpack/hot/only-dev-server',
+    './reactjs/App1',
+  ],
 }
+
+config.output.publicPath = 'http://' + ip + ':3000' + '/assets/bundles/'
+
+config.plugins = config.plugins.concat([
+  new webpack.HotModuleReplacementPlugin(),
+  new webpack.NoErrorsPlugin(),
+  new BundleTracker({filename: './webpack-stats-local.json'}),
+])
 ```
 
-`BUNDLE_DIR_NAME` tells Django in which folder within the `static` folder it
-can find our bundle.
+Ready? In one terminal window, start the webpack-dev-server with
+`node server.js` and in another terminal window, start the Django devserver
+with `./manage.py runserver`.
 
-`STATS_FILE` tells Django where it can find the JSON-file that maps entry-point
-names to bundle files. It is because of this stats file that we can use
-`{% render_bundle 'App1' %}` in our template. You will also find this `App1`
-name in your `webpack.base.config.js` file under the `entry` attribute.
+Make sure that you can still see "Something New!".
 
-Now run `./manage.py runserver` and visit your site. You should see
-"Sample App!".
+And now change it to `Something Fancy!` in `containers/App1Container.jsx` and
+switch back to your browser. If you are very fast, you can see how it updates
+itself.
 
-Now try to make a change to your ReactJS app. Change `Sample App!` to
-`Something New!` in `containers/App1Container.jsx`.
-
-Then run `node_modules/.bin/webpack --config webpack.local.config.js` again,
-make sure that `./manage.py runserver` is still running and visit your site
-in the browser. It should say "Something New!" now.
-
-Amazing, huh?
+There is another cool thing: When you open the site in Google Chrome and open
+the developer tools with `COMMAND+OPTION+i` and then open the `Sources` tab,
+you can see `webpack://` in the sidebar. It has a folder called `.` where you
+will find the original ReactJS sources. You can even put breakpoints here and
+debug your app like a pro. No more `console.log()` in your JavaScript code.
