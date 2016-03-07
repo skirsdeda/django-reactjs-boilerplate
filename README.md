@@ -1,36 +1,248 @@
-# Step 2: Add non-reactJS views
+# Step 3: Add django-webpack-loader
 
-We want to show that reactJS can easily be used with an existing project, so
-we will add a few "legacy-views" to simulate that this is an old existing
-Django project.
+Unfortunately, in this step a lot of stuff will happen all at once. Let's try
+to walk through it step by step.
 
-I added the following lines to `urls.py`:
+First of all we run `pip install django-webpack-loader` and of course we will
+also add it to `requirements.txt`.
+
+Next we need to add this new app to our `settings.py`:
 
 ```python
-from django.views import generic
-
-urlpatterns = [
-  url(r'^admin/', admin.site.urls),
-  url(r'^view2/',
-      generic.TemplateView.as_view(template_name='view2.html')),
-  url(r'^$',
-      generic.TemplateView.as_view(template_name='view1.html')),
+INSTALLED_APPS = [
+    ...
+    'webpack_loader',
 ]
 ```
 
-Next, I added a few templates to the `templates` folder and finally I made sure
-that Django is aware of these templates by putting this into `settings.py`:
+ReactJS is all about creating "bundles" (aka minified JavaScript files). These
+bundles will be saved in our `static` folder, just like we always used to do it
+with our CSS and JS files. So we need to make Django aware of this `static`
+folder in `settings.py`:
 
 ```python
-TEMPLATES = [
-    {
-        ...
-        'DIRS': [os.path.join(BASE_DIR, 'djreact/templates')],
-        ...
-    },
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'djreact/static'),
 ]
 ```
 
-At this point you can run `./manage.py runserver` and you should see "View 1"
-in your browser. You can change the URL to `/view2/` and you should see
-"View 2".
+Next we need to create a `package.json` file, which is something similar to
+Python's `requirements.txt` file:
+
+```json
+{
+  "name": "djreact",
+  "version": "0.0.1",
+  "devDependencies": {
+    "babel": "^6.5.2",
+    "babel-core": "^6.6.5",
+    "babel-eslint": "^5.0.0",
+    "babel-loader": "^6.2.4",
+    "babel-plugin-transform-decorators-legacy": "^1.3.4",
+    "babel-preset-es2015": "^6.6.0",
+    "babel-preset-react": "^6.5.0",
+    "babel-preset-stage-0": "^6.5.0",
+    "eslint": "^2.2.0",
+    "react": "^0.14.7",
+    "react-hot-loader": "^1.3.0",
+    "redux-devtools": "^3.1.1",
+    "webpack": "^1.12.13",
+    "webpack-bundle-tracker": "0.0.93",
+    "webpack-dev-server": "^1.14.1"
+  },
+  "dependencies": {
+    "es6-promise": "^3.1.2",
+    "isomorphic-fetch": "^2.2.1",
+    "lodash": "^4.5.1",
+    "radium": "^0.16.6",
+    "react-cookie": "^0.4.5",
+    "react-dom": "^0.14.7",
+    "react-redux": "^4.4.0",
+    "redux": "^3.3.1",
+    "redux-thunk": "^1.0.3"
+  }
+}
+```
+
+I won't explain in detail what each package is good for. Finding out what you
+really need is essentially one of the really hard parts when starting out
+with ReactJS. Describing the reasons behind each of these packages would go
+far beyond the scope of this quick tutorial.
+
+When you have created the file, you can install the packages via `npm intsall`.
+This will create a `node_modules` folder, so we should also add that folder to
+`.gitignore`.
+
+Now we are able to use `webpack` - in theory.
+
+In praxis, we must create quite a monstrous config first. I will cheat a
+little bit and already split it into two files because that will be quite
+helpful later. The first file is called `webpack.base.config.js` and looks
+like this:
+
+```javascript
+var path = require("path")
+var webpack = require('webpack')
+var BundleTracker = require('webpack-bundle-tracker')
+
+module.exports = {
+  context: __dirname,
+
+  entry: {
+    // Add as many entry points as you have container-react-components here
+    App1: './reactjs/App1',
+    vendors: ['react'],
+  },
+
+  output: {
+      path: path.resolve('./djreact/static/bundles/local/'),
+      filename: "[name]-[hash].js"
+  },
+
+  externals: [
+  ], // add all vendor libs
+
+  plugins: [
+    new webpack.optimize.CommonsChunkPlugin('vendors', 'vendors.js'),
+  ], // add all common plugins here
+
+  module: {
+    loaders: [] // add all common loaders here
+  },
+
+  resolve: {
+    modulesDirectories: ['node_modules', 'bower_components'],
+    extensions: ['', '.js', '.jsx']
+  },
+}
+```
+
+It does a lot of things:
+
+1. It defines the entry point. That is the JS-file that should be loaded first
+1. It defines the output path. This is where we want to save our bundle.
+1. It uses the `CommonsChunksPlugin`, this makes sure that ReactJS will be
+   saved as a different file (`vendors.js`), so that our actual app-bundle
+   doesn't become too big.
+
+The second file is called `webpack.local.config.js` and looks like this:
+
+```javascript
+var path = require("path")
+var webpack = require('webpack')
+var BundleTracker = require('webpack-bundle-tracker')
+
+var config = require('./webpack.base.config.js')
+
+config.devtool = "#eval-source-map"
+
+config.plugins = config.plugins.concat([
+  new BundleTracker({filename: './webpack-stats-local.json'}),
+])
+
+config.module.loaders.push(
+  { test: /\.jsx?$/, exclude: /node_modules/, loaders: ['react-hot', 'babel'] }
+)
+
+module.exports = config
+```
+
+This essentially adds one more plugin to the list. The `BundleTracker` plugin
+creates a JSON file every time we generate bundles. Django can then read that
+JSON file and will know which bundle belongs to which App-name (this will make
+more sense later).
+
+We will be using bleeding edge ES2015 JavaScript syntax for all our JavaScript
+code. A plugin called `babel` will transpile the advanced code back into
+something that browsers can understand. For this to work, we need to create
+the following `.babelrc` file:
+
+```json
+{
+  "presets": ["es2015", "react", "stage-0"],
+  "plugins": [
+    ["transform-decorators-legacy"],
+  ]
+}
+```
+
+Now we could use `webpack` to create a bundle, but we haven't written any
+JavaScript or ReactJS code, yet.
+
+First, create a `reactjs` folder and put a `App1.jsx` file inside. This is going
+to be one of our entrypoints for bundling. `webpack` will look into that file
+and then follow all it's imports and add them to the bundle, so that in the end
+we will have one `bundle.js` file that can be used by the browser.
+
+```javascript
+import React from "react"
+import { render } from "react-dom"
+
+import App1Container from "./containers/App1Container"
+
+class App1 extends React.Component {
+  render() {
+    return (
+      <App1Container />
+    )
+  }
+}
+
+render(<App1/>, document.getElementById('App1'))
+```
+
+As you can see, this file tries to import another component called
+`App1Container`. So let's create that one as well in the file
+`containers/App1Container.jsx`:
+
+```javascript
+import React from "react"
+
+import Headline from "../components/Headline"
+
+export default class App1Container extends React.Component {
+  render() {
+    return (
+      <div className="container">
+        <div className="row">
+          <div className="col-sm-12">
+            <Headline>Sample App!</Headline>
+          </div>
+        </div>
+      </div>
+    )
+  }
+}
+```
+
+And once again, that component imports another component called `Headline`.
+Let's create that one as well in `components/Headline.jsx`:
+
+```javascript
+import React from "react"
+
+export default class Headline extends React.Component {
+  render() {
+    return (
+      <h1>{ this.props.children }</h1>
+    )
+  }
+}
+```
+
+You might wonder why I am using a component `App1` and another one
+`App1Container`. This will make more sense a bit later. We will be using
+something called `Redux` to manage our app's state and you will see that Redux
+required quite a lot of boilerplate to be wrapped around your app. To keep my
+files cleaner, I like to have one "boilerplate" file, which then imports the
+actual ReactJS component that I want to build.
+
+You will also notice that I separate my components into a `containers` folder
+and into a `components` folder. You can think about this a bit like Django
+views. The main view template is your container. It contains the general
+structure and markup for your page. In the `components` we will have much
+smaller components that do one thing and one thing well. These components will
+be re-used and orchestrated by all our `container` components.
+
+At this point you can run `node_modules/.bin/webpack --config webpack.local.config.js`
+and it should generate some files in `djreact/static/bundles/`.
