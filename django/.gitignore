@@ -1,4 +1,0 @@
-*.pyc
-djreact/static/bundles/local/
-node_modules/
-webpack-stats-local.json

@@ -1,34 +1,17 @@
-# Django ReactJS Boilerplate
+# Step 1: Create your Django project
 
-This repository was used for my slides at the
-[Python User Group Singapore March Meetup 2016](http://www.meetup.com/Singapore-Python-User-Group/events/229113409/)
-
-The goal is to show how you can use ReactJS in your existing Django apps
-today.
-
-This is far from perfect. This approach is not _universal_, so it only works for
-components that don't need to be indexed by Google (and thus need to be
-pre-rendered on your server). However, the highly interactive stuff usually
-happens behind a login form anyways (think Trello: They have a few static pages
-to advertise their product but the real app is behind a login).
-
-Credit where credit is due:
-
-This awesome blog post by [Owais Lone](http://owaislone.org) finally pushed me
-into the right direction: http://owaislone.org/blog/webpack-plus-reactjs-and-django/
-
-# Try this on your machine
-
-You can clone this repository, install all dependencies and try it in your
-browser quite easily:
+Ok. So you decided you want to use ReactJS with your new or existing Django
+project. That's super cool. Since we don't have a project at hand, let's just
+create a new one:
 
 ```bash
-git clone https://github.com/mbrochh/django-reactjs-boilerplate.git
-cd django-react-boilerplace/django
 mkvirtualenv djreact
-pip install -r requirements.txt
-npm install
-./manage.py migrate
-./manage.py create_fixtures
-./manage.py runserver
+pip install Django
+django-admin startproject djreact
+mv djreact django
 ```
+
+This creates a new Django project in the root folder of your repository. I like
+to rename that folder to `django` just because it will sit besides other
+folders like `ansible` and maybe even `react-native`. I like the root folders
+to describe the main technology that is used within them.
