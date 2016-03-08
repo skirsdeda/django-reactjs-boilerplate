@@ -1,158 +1,144 @@
-# Step 6: Going to production
+# Step 7: Add Redux
 
-There are probably a hundred ways to achieve what we want to do in this step.
-You can take my approach as a suggestion or just apply whatever works best
-for your case.
+This step is just a bonus, really. You might want to use some other pattern
+to manage your component's state, but Redux is really nice to work with.
 
-One way would be to install all the node dependencies on your server and make
-sure that during each deployment you generate the bundles and then call
-`collectstatic`.
+The official Redux documentation is much better than anything that I could ever
+create, so you should read that. For our purposes, here is what you need to do:
 
-I prefer to do keep my servers as simple as possible and generate the bundles
-locally and commit them to the repository.
-
-Let's assume a typical 2-tier environment where we have a staging server and a
-production server. Let's assume that both servers have different URLs, so the
-API endpoints on staging all start with `https://sandbox.example.com/api/v1/`
-and the ones on production start with `https://example.com/api/v1`. You need to
-hard-code these values into your bundles, because that's what your user's
-browsers will download and execute.
-
-We need to create a new `webpack.stage.config.js` file and it looks like this:
+First you create some **Action Creators** in a new file called `reactjs/actions/counterActions.jsx`:
 
 ```javascript
-var webpack = require('webpack')
-var BundleTracker = require('webpack-bundle-tracker')
-
-var config = require('./webpack.base.config.js')
-
-config.output.path = require('path').resolve('./djreact/static/bundles/stage/')
-
-config.plugins = config.plugins.concat([
-  new BundleTracker({filename: './webpack-stats-stage.json'}),
-
-  // removes a lot of debugging code in React
-  new webpack.DefinePlugin({
-    'process.env': {
-      'NODE_ENV': JSON.stringify('staging'),
-      'BASE_API_URL': JSON.stringify('https://sandbox.example.com/api/v1/'),
-  }}),
-
-  // keeps hashes consistent between compilations
-  new webpack.optimize.OccurenceOrderPlugin(),
-
-  // minifies your code
-  new webpack.optimize.UglifyJsPlugin({
-    compressor: {
-      warnings: false
-    }
-  })
-])
-
-// Add a loader for JSX files
-config.module.loaders.push(
-  { test: /\.jsx?$/, exclude: /node_modules/, loader: 'babel' }
-)
-
-module.exports = config
-```
-
-And likewise, we need to add `webpack.prod.config.js` and it looks like this:
-
-```javascript
-var webpack = require('webpack')
-var BundleTracker = require('webpack-bundle-tracker')
-
-var config = require('./webpack.base.config.js')
-
-config.output.path = require('path').resolve('./djreact/static/bundles/prod/')
-
-config.plugins = config.plugins.concat([
-  new BundleTracker({filename: './webpack-stats-prod.json'}),
-
-  // removes a lot of debugging code in React
-  new webpack.DefinePlugin({
-    'process.env': {
-      'NODE_ENV': JSON.stringify('production'),
-      'BASE_API_URL': JSON.stringify('https://example.com/api/v1/'),
-  }}),
-
-  // keeps hashes consistent between compilations
-  new webpack.optimize.OccurenceOrderPlugin(),
-
-  // minifies your code
-  new webpack.optimize.UglifyJsPlugin({
-    compressor: {
-      warnings: false
-    }
-  })
-])
-
-// Add a loader for JSX files
-config.module.loaders.push(
-  { test: /\.jsx?$/, exclude: /node_modules/, loader: 'babel' }
-)
-
-module.exports = config
-```
-
-And because we are now using the `DefinePlugin` to add environment variables,
-we should update our `webpack.local.config.js` like this:
-
-```javascript
-config.plugins = config.plugins.concat([
-  new webpack.HotModuleReplacementPlugin(),
-  new webpack.NoErrorsPlugin(),
-  new BundleTracker({filename: './webpack-stats-local.json'}),
-  new webpack.DefinePlugin({
-    'process.env': {
-      'NODE_ENV': JSON.stringify('development'),
-      'BASE_API_URL': JSON.stringify('https://'+ ip +':8000/api/v1/'),
-  }}),
-])
-```
-
-We can now create stage and prod bundles like this:
-
-```bash
-node_modules/.bin/webpack --config webpack.stage.config.js
-node_modules/.bin/webpack --config webpack.prod.config.js
-```
-
-For us lazy programmers, that's really too much typing, so let's put that into
-a script. Run `pip install Fabric` and add it to `requirements.txt`.
-
-Then add the following `fabfile.py`:
-
-```python
-from fabric.api import local
-
-def webpack():
-    local('rm -rf djreact/static/bundles/stage/*')
-    local('rm -rf djreact/static/bundles/prod/*')
-    local('webpack --config webpack.stage.config.js --progress --colors')
-    local('webpack --config webpack.prod.config.js --progress --colors')
-```
-
-Your workflow will now look like this:
-
-1. Start `./manage.py runserver`
-1. Start `node server.js`
-1. Edit your ReactJS app
-1. When done, commit your changes
-1. Run `fab webpack` and commit your new bundles
-1. Run a deployment
-
-On your servers, you will need a `local_settings.py` where you override the
-`WEBPACK_LOADER` setting like this:
-
-```python
-WEBPACK_LOADER = {
-    'DEFAULT': {
-        'BUNDLE_DIR_NAME': 'bundles/stage/',  # end with slash
-        'STATS_FILE': os.path.join(BASE_DIR, 'webpack-stats-stage.json'),
-    }
+export const INCREASE = "INCREASE"
+export function increaseCounter() {
+    return {type: INCREASE}
 }
 ```
 
-And similar for prod, of course, just replace `stage` with `prod`.
+Next you create a so called reducer in a new file called
+`reactjs/reducers/counters.js`:
+
+```javascript
+import * as sampleActions from "../actions/counterActions"
+
+const initialState = {
+  clicks: 0,
+}
+
+export default function submissions(state=initialState, action={}) {
+  switch (action.type) {
+  case sampleActions.INCREASE:
+    return {...state, clicks: state.clicks + 1}
+  default:
+    return state
+  }
+}
+```
+
+Because we usually have many reducers (i.e. one for every Django model),
+I like to export them all in a file `reactjs/reducers/index.js`:
+
+```javascript
+export { default as counters } from './counters'
+```
+
+In one of the earlier steps I mentioned that Redux requires to setup quite
+a bit of boilerplate around your root-component. This is what we will do now
+in `App1.jsx`:
+
+```javascript
+import React from "react"
+import { render } from "react-dom"
+import {
+  createStore,
+  compose,
+  applyMiddleware,
+  combineReducers,
+} from "redux"
+import { Provider } from "react-redux"
+import thunk from "redux-thunk"
+
+import * as reducers from "./reducers"
+import App1Container from "./containers/App1Container"
+
+let finalCreateStore = compose(
+  applyMiddleware(thunk),
+  window.devToolsExtension ? window.devToolsExtension() : f => f
+)(createStore)
+let reducer = combineReducers(reducers)
+let store = finalCreateStore(reducer)
+
+class App1 extends React.Component {
+  render() {
+    return (
+      <Provider store={store}>
+        <App1Container />
+      </Provider>
+    )
+  }
+}
+
+render(<App1/>, document.getElementById('App1'))
+```
+
+That's a lot of magic that will make more sense to you when you read the full
+Redux documentation. Basically we are importing all our reducers and composing
+them into a store and then we wrap that `<Provider />` component around our
+actual root-component.
+
+Next we can upgrade our `App1Container` to make use of Redux:
+
+```javascript
+import React from "react"
+
+import { connect } from "react-redux"
+
+import * as counterActions from "../actions/counterActions"
+import Headline from "../components/Headline"
+
+@connect(state => ({
+  counters: state.counters,
+}))
+export default class SampleAppContainer extends React.Component {
+  handleClick() {
+    let {dispatch} = this.props;
+    dispatch(counterActions.increaseCounter())
+  }
+
+  render() {
+    let {counters} = this.props
+    return (
+      <div className="container">
+        <div className="row">
+          <div className="col-sm-12">
+            <Headline>Sample App!</Headline>
+            <div onClick={() => this.handleClick()}>INCREASE</div>
+            <p>{counters.clicks}</p>
+            <p>{process.env.BASE_API_URL}</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+}
+```
+
+Do you see now why I like to have `App1.jsx` as an entry point and
+`App1Container.jsx` as the actual root-component? As we "reactify" parts of
+our existing Django app step by step, each of our ReactJS apps will want to have
+access to Redux, so we will put that boilerplate around it's entry file. However
+at some time in the future we might reach a point where our ReactJS codebase is
+larger than our Django-template codebase and we might want to make the last
+final step and migrate everything over to 100% React. We will end up with just
+one single entry point (if we can turn the site into a SPA) or at least much
+lesser entry-points than before, so we can just delete those files in the
+`reactjs` root folder. We would then probably use something like react-router
+to compose our actual root-components in the `containers` folder.
+
+Oh and by the way! You should totally install this Chrome Extension:
+https://chrome.google.com/webstore/detail/redux-devtools/lmhkpmbekcpmknklioeibfkpmmfibljd
+
+Once you have that and you visit your site, you can open the developer tools
+with `COMMAND+OPTION+i` and there will be a `Redux` tab which will show you
+all actions that are being fired and the new values in your reducers after the
+action has fired. This is unbelievably helpful for debugging!
