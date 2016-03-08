@@ -165,4 +165,7 @@ with `COMMAND+OPTION+i` and there will be a `Redux` tab which will show you
 all actions that are being fired and the new values in your reducers after the
 action has fired. This is unbelievably helpful for debugging!
 
+Try to run `node server.js` and `./manage.py runserver` and click at the
+"INCREASE" link.
+
 [Step 8: Inline styles](https://github.com/mbrochh/django-reactjs-boilerplate/tree/step8_inline_styles)
