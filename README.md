@@ -10,7 +10,7 @@ One way would be to install all the node dependencies on your server and make
 sure that during each deployment you generate the bundles and then call
 `collectstatic`.
 
-I prefer to do keep my servers as simple as possible and generate the bundles
+I prefer to keep my servers as simple as possible and generate the bundles
 locally and commit them to the repository.
 
 Let's assume a typical 2-tier environment where we have a staging server and a
