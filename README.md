@@ -37,11 +37,11 @@ npm install
 If you want to learn how I came up with this repository, you can follow my
 train of thought by going into all those branches.
 
-The `README.md` will tell you what you need to do in order to get to a state
-that is (hopefully) equal to that branch. If anything doesn't work, just compare
-your files to the ones in the branch. If your really can't figure it out, just
-checkout that branch and run it locally and play with it for a while, then move
-on to the next branch.
+The `README.md` in each branch will tell you what you need to do in order to get
+to a state that is (hopefully) equal to that branch. If anything doesn't work,
+just compare your files to the ones in the branch. If your really can't figure
+it out, just checkout that branch and run it locally and play with it for a
+while, then move on to the next branch.
 
 Start with
 [Step 1: Create your Django project](https://github.com/mbrochh/django-reactjs-boilerplate/tree/step1_create_project)
