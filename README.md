@@ -1,105 +1,52 @@
-# Step 7: Add Redux
+# Step 8: Inline Styles
 
-This step is just a bonus, really. You might want to use some other pattern
-to manage your component's state, but Redux is really nice to work with.
+This, to me, is the greatest advancement in web development since the invention
+of CSS. Do you have humongous stylesheets in your projects where no one ever
+dares to delete a style because nobody knows where in the project it might still
+be in use? React solves that.
 
-The official Redux documentation is much better than anything that I could ever
-create, so you should read that. For our purposes, here is what you need to do:
+Do you use LESS or SASS and build nicely nested styles like this:
 
-First you create some **Action Creators** in a new file called `reactjs/actions/counterActions.jsx`:
-
-```javascript
-export const INCREASE = "INCREASE"
-export function increaseCounter() {
-    return {type: INCREASE}
-}
-```
-
-Next you create a so called reducer in a new file called
-`reactjs/reducers/counters.js`:
-
-```javascript
-import * as sampleActions from "../actions/counterActions"
-
-const initialState = {
-  clicks: 0,
-}
-
-export default function submissions(state=initialState, action={}) {
-  switch (action.type) {
-  case sampleActions.INCREASE:
-    return {...state, clicks: state.clicks + 1}
-  default:
-    return state
+```less
+.some-container {
+  .some-inner-container {
+    .active {
+      ...
+    }
   }
 }
 ```
 
-Because we usually have many reducers (i.e. one for every Django model),
-I like to export them all in a file `reactjs/reducers/index.js`:
+And then you want to re-use that `.active` style on some new element but you
+can't because that element would have to be wrapped in those other elements
+that have the outer styles. React solves that as well.
 
-```javascript
-export { default as counters } from './counters'
-```
-
-In one of the earlier steps I mentioned that Redux requires to setup quite
-a bit of boilerplate around your root-component. This is what we will do now
-in `App1.jsx`:
+Update your `App1Container.jsx` to use Radium for styles:
 
 ```javascript
 import React from "react"
-import { render } from "react-dom"
-import {
-  createStore,
-  compose,
-  applyMiddleware,
-  combineReducers,
-} from "redux"
-import { Provider } from "react-redux"
-import thunk from "redux-thunk"
-
-import * as reducers from "./reducers"
-import App1Container from "./containers/App1Container"
-
-let finalCreateStore = compose(
-  applyMiddleware(thunk),
-  window.devToolsExtension ? window.devToolsExtension() : f => f
-)(createStore)
-let reducer = combineReducers(reducers)
-let store = finalCreateStore(reducer)
-
-class App1 extends React.Component {
-  render() {
-    return (
-      <Provider store={store}>
-        <App1Container />
-      </Provider>
-    )
-  }
-}
-
-render(<App1/>, document.getElementById('App1'))
-```
-
-That's a lot of magic that will make more sense to you when you read the full
-Redux documentation. Basically we are importing all our reducers and composing
-them into a store and then we wrap that `<Provider />` component around our
-actual root-component.
-
-Next we can upgrade our `App1Container` to make use of Redux:
-
-```javascript
-import React from "react"
+import Radium from "radium"
 
 import { connect } from "react-redux"
 
 import * as counterActions from "../actions/counterActions"
 import Headline from "../components/Headline"
 
+const styles = {
+  button: {
+    cursor: "pointer",
+  },
+  counter: {
+    color: "blue",
+    fontSize: "20px",
+  }
+}
+
 @connect(state => ({
   counters: state.counters,
 }))
-export default class SampleAppContainer extends React.Component {
+@Radium
+export default class App1Container extends React.Component {
   handleClick() {
     let {dispatch} = this.props;
     dispatch(counterActions.increaseCounter())
@@ -112,8 +59,8 @@ export default class SampleAppContainer extends React.Component {
         <div className="row">
           <div className="col-sm-12">
             <Headline>Sample App!</Headline>
-            <div onClick={() => this.handleClick()}>INCREASE</div>
-            <p>{counters.clicks}</p>
+            <div style={[styles.button]} onClick={() => this.handleClick()}>INCREASE</div>
+            <p style={[styles.counter]}>{counters.clicks}</p>
             <p>{process.env.BASE_API_URL}</p>
           </div>
         </div>
@@ -123,22 +70,14 @@ export default class SampleAppContainer extends React.Component {
 }
 ```
 
-Do you see now why I like to have `App1.jsx` as an entry point and
-`App1Container.jsx` as the actual root-component? As we "reactify" parts of
-our existing Django app step by step, each of our ReactJS apps will want to have
-access to Redux, so we will put that boilerplate around it's entry file. However
-at some time in the future we might reach a point where our ReactJS codebase is
-larger than our Django-template codebase and we might want to make the last
-final step and migrate everything over to 100% React. We will end up with just
-one single entry point (if we can turn the site into a SPA) or at least much
-lesser entry-points than before, so we can just delete those files in the
-`reactjs` root folder. We would then probably use something like react-router
-to compose our actual root-components in the `containers` folder.
+That's it! You define a `styles` object, wrap your class with the `@Radium`
+decorator and then use your styles. Remember: It's all just JavaScript. You will
+quickly want a `theme.js` file somewhere in your project that all your
+components can import so that you can re-use commonly used values like
+font-family, font sizes, colors etc.
 
-Oh and by the way! You should totally install this Chrome Extension:
-https://chrome.google.com/webstore/detail/redux-devtools/lmhkpmbekcpmknklioeibfkpmmfibljd
-
-Once you have that and you visit your site, you can open the developer tools
-with `COMMAND+OPTION+i` and there will be a `Redux` tab which will show you
-all actions that are being fired and the new values in your reducers after the
-action has fired. This is unbelievably helpful for debugging!
+So far, I have never put anything other than constants into my `theme.js`. All
+other markup and component-specific styling happens in the component itself.
+Now it is save to change, add and delete styles right there in the component,
+because it will only affect that component and developers can see at one glance
+what styles are there and where they are used.
