@@ -2,11 +2,13 @@
 
 [Back to step 6](https://github.com/mbrochh/django-reactjs-boilerplate/tree/step6_going_to_production)
 
-This step is just a bonus, really. You might want to use some other pattern
-to manage your component's state, but Redux is really nice to work with.
+This step is just a bonus, really. You might want to use some other flux
+implementation to manage your components' state, but Redux is really nice to
+work with and the de-facto standard at the moment.
 
-The official Redux documentation is much better than anything that I could ever
-create, so you should read that. For our purposes, here is what you need to do:
+The official [Redux documentation](http://redux.js.org) is much better than
+anything that I could ever create, so you should read that. For our purposes,
+here is what you need to copy & paste:
 
 First you create some **Action Creators** in a new file called `reactjs/actions/counterActions.jsx`:
 
@@ -17,8 +19,17 @@ export function increaseCounter() {
 }
 ```
 
-Next you create a so called reducer in a new file called
-`reactjs/reducers/counters.js`:
+Any action that can somehow change the state of your app should have a constant
+and for each constant there should be a function that returns either another
+function or an object with at least `{type: CONSTANT}`. Those objects can have
+more data attached, to them, for example `{type: CONSTANT, productId: 1}`. This
+data will be accessible in your reducers.
+
+Speaking of which: Reducers are like stores of data. In Python terms, it's
+really just a dictionary, usually holding JSON objects that your API has
+returned. I like to have one reducer-file for each Django model.
+
+Let's create a reducer in a new file called `reactjs/reducers/counters.js`:
 
 ```javascript
 import * as sampleActions from "../actions/counterActions"
@@ -36,6 +47,14 @@ export default function submissions(state=initialState, action={}) {
   }
 }
 ```
+
+See that `{...state, clicks: state.clicks + 1}` line there? That's a new
+JavaScript feature called "destructing". It means: "Create a copy of the object
+`state` but replace the attribute `clicks` with something new". This is the only
+important thing about reducers: They must **never** mutate the state that is
+passed into the function. They must always either return the unchanged state or
+return a new object. This is why most people like to use [immutable.js](https://github.com/facebook/immutable-js), but so far I have been
+too stupid to use it in my projects with Redux :(
 
 Because we usually have many reducers (i.e. one for every Django model),
 I like to export them all in a file `reactjs/reducers/index.js`:
@@ -88,7 +107,8 @@ Redux documentation. Basically we are importing all our reducers and composing
 them into a store and then we wrap that `<Provider />` component around our
 actual root-component.
 
-Next we can upgrade our `App1Container` to make use of Redux:
+Next we can upgrade our `App1Container` to make use of Redux via the `@connect`
+decorator:
 
 ```javascript
 import React from "react"
