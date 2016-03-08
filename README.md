@@ -1,6 +1,6 @@
 # Django ReactJS Boilerplate
 
-This repository was used for my slides at the
+This repository was used for my talk at the
 [Python User Group Singapore March Meetup 2016](http://www.meetup.com/Singapore-Python-User-Group/events/229113409/)
 
 The goal is to show how you can use ReactJS in your existing Django apps
@@ -32,3 +32,9 @@ npm install
 ./manage.py create_fixtures
 ./manage.py runserver
 ```
+
+# Follow my train of thought
+
+If you want to learn how I came up with this repository, you can follow my
+train of thought by going into all those branches. Start with
+[Step 1: Create your Django project](https://github.com/mbrochh/django-reactjs-boilerplate/tree/step1_create_project)
