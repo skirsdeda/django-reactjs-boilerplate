@@ -1,5 +1,7 @@
 # Step 5: Hot Reloading
 
+[Back to step 4](https://github.com/mbrochh/django-reactjs-boilerplate/tree/step4_use_the_bundle)
+
 Step 4 was nice and awesome, but not mind-blowing. Let's do mind-blowing now.
 We don't really want to run that `webpack` command every time we change our
 ReactJS app (and create thousands of local bundles in the process). We want to
@@ -63,3 +65,5 @@ the developer tools with `COMMAND+OPTION+i` and then open the `Sources` tab,
 you can see `webpack://` in the sidebar. It has a folder called `.` where you
 will find the original ReactJS sources. You can even put breakpoints here and
 debug your app like a pro. No more `console.log()` in your JavaScript code.
+
+[Step 6: Going to production](https://github.com/mbrochh/django-reactjs-boilerplate/tree/step6_going_to_production)
