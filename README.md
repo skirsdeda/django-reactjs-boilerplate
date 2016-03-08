@@ -1,5 +1,7 @@
 # Step 1: Create your Django project
 
+[Back to master branch](https://github.com/mbrochh/django-reactjs-boilerplate/tree/master)
+
 Ok. So you decided you want to use ReactJS with your new or existing Django
 project. That's super cool. Since we don't have a project at hand, let's just
 create a new one:
@@ -24,3 +26,5 @@ And finally we should create a `.gitignore` file and add `*.pyc` files and
 
 At this point, you can run `./manage.py runserver` and you should see the
 Django welcome page in your browser.
+
+[Step 2: Add non-React views](https://github.com/mbrochh/django-reactjs-boilerplate/tree/step2_add_non_react_views)
