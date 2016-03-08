@@ -1,5 +1,7 @@
 # Step 7: Add Redux
 
+[Back to step 6](https://github.com/mbrochh/django-reactjs-boilerplate/tree/step6_going_to_production)
+
 This step is just a bonus, really. You might want to use some other pattern
 to manage your component's state, but Redux is really nice to work with.
 
@@ -142,3 +144,5 @@ Once you have that and you visit your site, you can open the developer tools
 with `COMMAND+OPTION+i` and there will be a `Redux` tab which will show you
 all actions that are being fired and the new values in your reducers after the
 action has fired. This is unbelievably helpful for debugging!
+
+[Step 8: Inline styles](https://github.com/mbrochh/django-reactjs-boilerplate/tree/step8_inline_styles)
