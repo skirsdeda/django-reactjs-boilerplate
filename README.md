@@ -1,5 +1,7 @@
 # Step 6: Going to production
 
+[Back to step 5](https://github.com/mbrochh/django-reactjs-boilerplate/tree/step5_hot_reloading)
+
 There are probably a hundred ways to achieve what we want to do in this step.
 You can take my approach as a suggestion or just apply whatever works best
 for your case.
@@ -156,3 +158,5 @@ WEBPACK_LOADER = {
 ```
 
 And similar for prod, of course, just replace `stage` with `prod`.
+
+[Step 7: Add Redux](https://github.com/mbrochh/django-reactjs-boilerplate/tree/step7_add_redux)
