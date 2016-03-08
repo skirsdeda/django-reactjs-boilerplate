@@ -1,5 +1,7 @@
 # Step 3: Add django-webpack-loader
 
+[Back to step 2](https://github.com/mbrochh/django-reactjs-boilerplate/tree/step2_add_non_react_views)
+
 Unfortunately, in this step a lot of stuff will happen all at once. Let's try
 to walk through it step by step.
 
@@ -246,3 +248,5 @@ be re-used and orchestrated by all our `container` components.
 
 At this point you can run `node_modules/.bin/webpack --config webpack.local.config.js`
 and it should generate some files in `djreact/static/bundles/`.
+
+[Step 4: Use the bundle](https://github.com/mbrochh/django-reactjs-boilerplate/tree/step4_use_the_bundle)
