@@ -2,13 +2,19 @@
 
 [Back to step 2](https://github.com/mbrochh/django-reactjs-boilerplate/tree/step2_add_non_react_views)
 
-Unfortunately, in this step a lot of stuff will happen all at once. Let's try
-to walk through it step by step.
+Unfortunately, in this step a lot of stuff will happen all at once. This is
+the step where most people give up, because Webpack is one monster of a tool
+and super hard to understand and to configure.
 
-First of all we run `pip install django-webpack-loader` and of course we will
-also add it to `requirements.txt`.
+Let's try to walk through this step by step.
 
-Next we need to add this new app to our `settings.py`:
+First of all we need to run `pip install django-webpack-loader` and of course
+we will also add it to `requirements.txt`. Tip: Whenever you install something
+with `pip`, run `pip freeze` immediately after and copy and paste that package
+with it's version number into your `requirements.txt`.
+
+Next we need to add this reusable Django app to the `INSTALLED_APPS` setting
+in our `settings.py`:
 
 ```python
 INSTALLED_APPS = [
@@ -69,15 +75,18 @@ Python's `requirements.txt` file:
 I won't explain in detail what each package is good for. Finding out what you
 really need is essentially one of the really hard parts when starting out
 with ReactJS. Describing the reasons behind each of these packages would go
-far beyond the scope of this quick tutorial.
+far beyond the scope of this quick tutorial. A lot of this stuff has to do with
+[Babel](http://babeljs.io), which is a tool that "transpiles" cutting edge
+JavaScript syntax into something that browsers support.
 
 When you have created the file, you can install the packages via `npm intsall`.
 This will create a `node_modules` folder, so we should also add that folder to
-`.gitignore`.
+`.gitignore`. If you don't have `npm` installed, now is a good time to google
+for it and find out how to install it on your OS.
 
-Now we are able to use `webpack` - in theory.
+After you ran `npm install`, you should be able to use `webpack` - in theory.
 
-In praxis, we must create quite a monstrous config first. I will cheat a
+In praxis, you need to create quite a monstrous config first. I will cheat a
 little bit and already split it into two files because that will be quite
 helpful later. The first file is called `webpack.base.config.js` and looks
 like this:
@@ -85,7 +94,6 @@ like this:
 ```javascript
 var path = require("path")
 var webpack = require('webpack')
-var BundleTracker = require('webpack-bundle-tracker')
 
 module.exports = {
   context: __dirname,
@@ -133,7 +141,6 @@ The second file is called `webpack.local.config.js` and looks like this:
 var path = require("path")
 var webpack = require('webpack')
 var BundleTracker = require('webpack-bundle-tracker')
-
 var config = require('./webpack.base.config.js')
 
 config.devtool = "#eval-source-map"
@@ -149,13 +156,15 @@ config.module.loaders.push(
 module.exports = config
 ```
 
-This essentially adds one more plugin to the list. The `BundleTracker` plugin
-creates a JSON file every time we generate bundles. Django can then read that
-JSON file and will know which bundle belongs to which App-name (this will make
-more sense later).
+This essentially loads the base config and then adds a few things to it, most
+notably one more plugin: The `BundleTracker` plugin.
+
+This plugin creates a JSON file every time we generate bundles. Django can then
+read that JSON file and will know which bundle belongs to which App-name (this
+  will make more sense later).
 
 We will be using bleeding edge ES2015 JavaScript syntax for all our JavaScript
-code. A plugin called `babel` will transpile the advanced code back into
+code. A plugin called `babel` will "transpile" the advanced code back into
 something that browsers can understand. For this to work, we need to create
 the following `.babelrc` file:
 
@@ -172,9 +181,9 @@ Now we could use `webpack` to create a bundle, but we haven't written any
 JavaScript or ReactJS code, yet.
 
 First, create a `reactjs` folder and put a `App1.jsx` file inside. This is going
-to be one of our entrypoints for bundling. `webpack` will look into that file
+to be one of our entry-points for bundling. `webpack` will look into that file
 and then follow all it's imports and add them to the bundle, so that in the end
-we will have one `bundle.js` file that can be used by the browser.
+we will have one big `App1.js` file that can be used by the browser.
 
 ```javascript
 import React from "react"
@@ -235,7 +244,7 @@ export default class Headline extends React.Component {
 You might wonder why I am using a component `App1` and another one
 `App1Container`. This will make more sense a bit later. We will be using
 something called `Redux` to manage our app's state and you will see that Redux
-required quite a lot of boilerplate to be wrapped around your app. To keep my
+requires quite a lot of boilerplate to be wrapped around your app. To keep my
 files cleaner, I like to have one "boilerplate" file, which then imports the
 actual ReactJS component that I want to build.
 
@@ -244,7 +253,9 @@ and into a `components` folder. You can think about this a bit like Django
 views. The main view template is your container. It contains the general
 structure and markup for your page. In the `components` we will have much
 smaller components that do one thing and one thing well. These components will
-be re-used and orchestrated by all our `container` components.
+be re-used and orchestrated by all our `container` components, they would be the
+equivalent of smaller partial templates that you import in Django using the
+`{% import %}` tag.
 
 At this point you can run `node_modules/.bin/webpack --config webpack.local.config.js`
 and it should generate some files in `djreact/static/bundles/`.
