@@ -183,7 +183,7 @@ JavaScript or ReactJS code, yet.
 First, create a `reactjs` folder and put a `App1.jsx` file inside. This is going
 to be one of our entry-points for bundling. `webpack` will look into that file
 and then follow all it's imports and add them to the bundle, so that in the end
-we will have one big `App1.js` file that can be used by the browser.
+we will have one big `App1.jsx` file that can be used by the browser.
 
 ```javascript
 import React from "react"
