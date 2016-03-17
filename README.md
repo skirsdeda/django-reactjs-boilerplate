@@ -38,7 +38,7 @@ const initialState = {
   clicks: 0,
 }
 
-export default function submissions(state=initialState, action={}) {
+export default function counters(state=initialState, action={}) {
   switch (action.type) {
   case sampleActions.INCREASE:
     return {...state, clicks: state.clicks + 1}
