@@ -1,5 +1,7 @@
 # Step 9: Fetching Data
 
+[Back to step 8](https://github.com/mbrochh/django-reactjs-boilerplate/tree/step8_inline_styles)
+
 This is another thing where you have 100 different options and I'm not sure
 if this is the best way to do it. There are new technologies evolving like
 Relay and GraphQL that will make this step even easier. For me, the technique
