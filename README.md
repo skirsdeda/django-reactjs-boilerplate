@@ -1,5 +1,7 @@
 # Step 8: Inline Styles
 
+[Back to step 7](https://github.com/mbrochh/django-reactjs-boilerplate/tree/step7_add_redux)
+
 This, to me, is the greatest advancement in web development since the invention
 of CSS. Do you have humongous stylesheets in your projects where no one ever
 dares to delete a style because nobody knows where in the project it might still
@@ -81,3 +83,5 @@ other markup and component-specific styling happens in the component itself.
 Now it is save to change, add and delete styles right there in the component,
 because it will only affect that component and developers can see at one glance
 what styles are there and where they are used.
+
+[Step 9: Fetching data](https://github.com/mbrochh/django-reactjs-boilerplate/tree/step9_fetching_data)
