@@ -22,7 +22,7 @@ request times out or you might even not have a network connection at all. In
 order to deal with all these errors, I wrote a little wrapper around the
 `fetch` function. Let's create a file `utils.js` in the `reactjs` folder:
 
-```
+```javascript
 import fetch from "isomorphic-fetch"
 
 let headers = {
@@ -75,7 +75,7 @@ this and then forget about it.
 Now we need to create action creators for Redux. Create a file
 `actions/githubActions.js` with the following content:
 
-```
+```javascript
 import { request } from "../utils"
 
 export const FETCH_REPOS = "FETCH_REPOS"
@@ -108,7 +108,7 @@ Next we write a function called `fetchRepos()`. Now something weird is going on.
 From the action creator in `counterActions.js` you might remember that the
 action creator is supposed to return an object that looks like this:
 
-```
+```javascript
 return {type: SOME_CONSTANT}
 ```
 
@@ -131,7 +131,7 @@ object).
 Now that we have action creators, we can implement a reducer that listens to
 those actions. Create a file `reducers/github.js`:
 
-```
+```javascript
 import * as githubActions from "../actions/githubActions"
 
 const initialState = {
@@ -166,7 +166,7 @@ a new value.
 You also need to update your `reducers/index.js` so that this new reducer is
 added to the list of reducers that your app is aware of:
 
-```
+```javascript
 export { default as counters } from "./counters"
 export { default as github } from "./github"
 ```
@@ -177,7 +177,7 @@ to change a lot of code in `containers/App1Container.js`.
 First of all, import your new action creator. I'm also importing a new component
 called `GithubRepos` here which we will implement next a bit further down.
 
-```
+```javascript
 import * as counterActions from "../actions/counterActions"
 import * as githubActions from "../actions/githubActions"
 import Headline from "../components/Headline"
@@ -190,7 +190,7 @@ component's props (so it will be `this.props.github`) and the value
 (i.e. `state.github`) refers to the name with which you imported the reducer in
 `reducers/index.js`:
 
-```
+```javascript
 @connect(state => ({
   counters: state.counters,
   github: state.github,
@@ -200,7 +200,7 @@ component's props (so it will be `this.props.github`) and the value
 Now you need to make sure that your component calls the new `fetchRepos` action
 as soon as it mounts:
 
-```
+```javascript
 componentDidMount() {
   let {dispatch, github} = this.props
   if (!github.isLoadingRepos && github.repos === undefined) {
@@ -212,7 +212,7 @@ componentDidMount() {
 I like to add a `renderLoading()` function to my components that displays a
 loading screen while it is fetching it's data:
 
-```
+```javascript
 renderLoading() {
   return (
     <div className="container">
@@ -229,7 +229,7 @@ renderLoading() {
 And finally we update our `render()` function to either show the loading
 screen or show the full app:
 
-```
+```javascript
 render() {
   let {counters, github} = this.props
   if (github.isLoadingRepos || github.repos === undefined) {
@@ -257,7 +257,7 @@ You can see that in the case where `{github.repos !== undefined && }` we want
 to render our new `GithubRepos` component, so we need to implement this
 component as well. Create a new file `components/GithubRepos.jsx`:
 
-```
+```javascript
 import React from "react"
 
 export default class GithubRepos extends React.Component {
