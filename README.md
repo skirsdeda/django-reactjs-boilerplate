@@ -172,7 +172,7 @@ export { default as github } from "./github"
 ```
 
 Finally you can now use your new reducer in your components. For this, we need
-to change a lot of code in `containers/App1Container.js`.
+to change a lot of code in `containers/App1Container.jsx`.
 
 First of all, import your new action creator. I'm also importing a new component
 called `GithubRepos` here which we will implement next a bit further down.
