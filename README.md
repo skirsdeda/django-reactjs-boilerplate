@@ -10,7 +10,7 @@ The official [Redux documentation](http://redux.js.org) is much better than
 anything that I could ever create, so you should read that. For our purposes,
 here is what you need to copy & paste:
 
-First you create some **Action Creators** in a new file called `reactjs/actions/counterActions.jsx`:
+First you create some **Action Creators** in a new file called `reactjs/actions/counterActions.js`:
 
 ```javascript
 export const INCREASE = "INCREASE"
