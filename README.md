@@ -25,11 +25,10 @@ order to deal with all these errors, I wrote a little wrapper around the
 ```javascript
 import fetch from "isomorphic-fetch"
 
-let headers = {
- "Content-Type": "application/json",
-}
-
 export function request(url, options, success, error400, error, failure) {
+  let headers = new Headers()
+  headers.append("Content-Type", "application/json")
+  headers.append("Accept", "application/json")
   options["headers"] = headers
   return fetch(url, options)
     .then(res => {
