@@ -3,6 +3,9 @@
 This repository was used for my talk at the
 [Python User Group Singapore March Meetup 2016](http://www.meetup.com/Singapore-Python-User-Group/events/229113409/)
 
+I gave the talk a second time at a PyLadies meetup and it was recorded by
+[Engineers.SG](https://engineers.sg/presenter/mbrochh).
+
 The goal is to show how you can use ReactJS in your existing Django apps
 today.
 
