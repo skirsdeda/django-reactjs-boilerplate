@@ -33,6 +33,9 @@ pip install -r requirements.txt
 npm install
 ./manage.py migrate
 ./manage.py runserver
+
+# in another terminal:
+node server.js
 ```
 
 # Follow my train of thought
