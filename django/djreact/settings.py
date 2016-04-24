@@ -123,7 +123,6 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'djreact/static'),
 ]
-print STATICFILES_DIRS
 
 try:
     from .local_settings import *  # flake8: noqa
