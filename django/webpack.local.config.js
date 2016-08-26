@@ -7,7 +7,7 @@ var localSettings = require('./webpack.local-settings.js')
 
 var ip = localSettings.ip
 
-config.devtool = "#eval-source-map"
+config.devtool = "source-map"
 
 config.ip = ip
 
@@ -41,9 +41,10 @@ config.plugins = config.plugins.concat([
 
 ])
 
-// Add a loader for JSX files with react-hot enabled
-config.module.loaders.push(
-  { test: /\.jsx?$/, exclude: /node_modules/, loaders: ['react-hot', 'babel'] }
-)
+// Add a loader for TSX files
+config.module.loaders = config.module.loaders.concat([
+  { test: /\.ts$/, exclude: /node_modules/, loader: 'ts-loader' },
+  { test: /\.tsx$/, exclude: /node_modules/, loaders: ['ts-loader'/*, 'react-hot'*/] }
+])
 
 module.exports = config
