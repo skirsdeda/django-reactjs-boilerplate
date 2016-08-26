@@ -1,4 +1,4 @@
-import React from "react"
+import * as React from "react"
 import Headline from "../components/Headline"
 
 export default class SampleApp2Container extends React.Component {
