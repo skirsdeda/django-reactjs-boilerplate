@@ -2,7 +2,8 @@
     "compilerOptions": {
         //"outDir": "./assets/bundles/",
         "sourceMap": true,
-        "noImplicitAny": true,
+        "experimentalDecorators": true,
+        "noImplicitAny": false,
         "module": "commonjs",
         "target": "es5",
         "jsx": "react"

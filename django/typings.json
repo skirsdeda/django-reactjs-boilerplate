@@ -1,9 +1,11 @@
 {
   "name": "djreact",
-  "dependencies": {},
   "devDependencies": {
+    "lodash": "registry:npm/lodash#4.0.0+20160723033700",
+    "radium": "registry:npm/radium#0.16.6+20160310030142",
     "react": "registry:npm/react#15.0.1+20160601175240",
     "react-dom": "registry:npm/react-dom#15.0.1+20160705210405",
-    "react-redux": "registry:npm/react-redux#4.4.0+20160614222153"
+    "react-redux": "registry:npm/react-redux#4.4.0+20160614222153",
+    "redux-thunk": "registry:npm/redux-thunk#2.0.0+20160525185520"
   }
 }

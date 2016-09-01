@@ -1,5 +1,5 @@
 import * as React from "react"
-import Radium from "radium"
+import * as Radium from "radium"
 
 import { connect } from "react-redux"
 
@@ -16,26 +16,36 @@ const styles = {
   }
 }
 
-@connect(state => ({
-  counters: state.counters,
-}))
-@Radium
-export default class SampleAppContainer extends React.Component {
-  handleClick() {
-    let {dispatch} = this.props;
-    dispatch(counterActions.increaseCounter())
-  }
+export interface CounterProps {
+  clicks: number;
+  onClick();
+}
 
+const mapStateToProps = (state) => {
+  return {
+    clicks: state.counters.props,
+  }
+}
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    onClick: () => {
+      dispatch(counterActions.increaseCounter());
+    },
+  }
+}
+
+@connect(mapStateToProps, mapDispatchToProps)
+@Radium
+export default class SampleAppContainer extends React.Component<CounterProps, {}> {
   render() {
-    let {counters} = this.props
     return (
       <div className="container">
         <div className="row">
           <div className="col-sm-12">
             <Headline>Sample App!</Headline>
-            <div style={[styles.button]} onClick={() => this.handleClick()}>INCREASE</div>
-            <p style={[styles.counter]}>{counters.clicks}</p>
-            <p>{process.env.BASE_API_URL}</p>
+            <div style={[styles.button]} onClick={this.props.onClick}>INCREASE</div>
+            <p style={[styles.counter]}>{this.props.clicks}</p>
           </div>
         </div>
       </div>

@@ -1,7 +1,7 @@
 import * as React from "react"
 import Headline from "../components/Headline"
 
-export default class SampleApp2Container extends React.Component {
+export default class SampleApp2Container extends React.Component<{}, {}> {
   render() {
     return (
       <div className="container">
