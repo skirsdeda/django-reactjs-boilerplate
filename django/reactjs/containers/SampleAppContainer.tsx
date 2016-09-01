@@ -23,7 +23,7 @@ export interface CounterProps {
 
 const mapStateToProps = (state) => {
   return {
-    clicks: state.counters.props,
+    clicks: state.counters.clicks,
   }
 }
 
