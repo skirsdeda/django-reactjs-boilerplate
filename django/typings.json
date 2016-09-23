@@ -7,5 +7,9 @@
     "react-dom": "registry:npm/react-dom#15.0.1+20160705210405",
     "react-redux": "registry:npm/react-redux#4.4.0+20160614222153",
     "redux-thunk": "registry:npm/redux-thunk#2.0.0+20160525185520"
+  },
+  "globalDevDependencies": {
+    "react-css-modules": "registry:dt/react-css-modules#3.7.9+20160805170511",
+    "require": "registry:dt/require#2.1.20+20160919185614"
   }
 }

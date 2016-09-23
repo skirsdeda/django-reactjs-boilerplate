@@ -1,6 +1,7 @@
 var path = require("path")
 var webpack = require('webpack')
 var BundleTracker = require('webpack-bundle-tracker')
+var ExtractTextPlugin = require('extract-text-webpack-plugin')
 
 var config = require('./webpack.base.config.js')
 var localSettings = require('./webpack.local-settings.js')
@@ -16,12 +17,12 @@ config.entry = {
   SampleApp: [
     'webpack-dev-server/client?http://' + ip + ':3000',
     'webpack/hot/only-dev-server',
-    './reactjs/SampleApp',
+    './SampleApp',
   ],
   SampleApp2: [
     'webpack-dev-server/client?http://' + ip + ':3000',
     'webpack/hot/only-dev-server',
-    './reactjs/SampleApp2',
+    './SampleApp2',
   ]
 }
 
@@ -30,6 +31,7 @@ config.output.publicPath = 'http://' + ip + ':3000' + '/assets/bundles/'
 
 // Add HotModuleReplacementPlugin and BundleTracker plugins
 config.plugins = config.plugins.concat([
+  new ExtractTextPlugin('app.css', {allChunks: true}),
   new webpack.HotModuleReplacementPlugin(),
   new webpack.NoErrorsPlugin(),
   new BundleTracker({filename: './webpack-stats-local.json'}),
@@ -42,9 +44,11 @@ config.plugins = config.plugins.concat([
 ])
 
 // Add a loader for TSX files
+var srcDir = path.resolve(__dirname, './reactjs')
 config.module.loaders = config.module.loaders.concat([
-  { test: /\.ts$/, exclude: /node_modules/, loader: 'ts-loader' },
-  { test: /\.tsx$/, exclude: /node_modules/, loaders: ['ts-loader'/*, 'react-hot'*/] }
+  { test: /\.css$/, loader: ExtractTextPlugin.extract('style', 'css?modules&importLoaders=1&localIdentName=[name]__[local]__[hash:base64:5]')},
+  { test: /\.ts$/, include: srcDir, loader: 'awesome-typescript' },
+  { test: /\.tsx$/, include: srcDir, loaders: ['awesome-typescript'/*, 'react-hot'*/] }
 ])
 
 module.exports = config

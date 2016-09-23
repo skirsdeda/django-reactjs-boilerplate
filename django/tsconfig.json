@@ -10,5 +10,9 @@
     },
     "files": [
         "./typings/index.d.ts"
-    ]
+    ],
+    "awesomeTypescriptLoaderOptions": {
+        //"forkChecker": true,
+        //"useBabel": true
+    }
 }
