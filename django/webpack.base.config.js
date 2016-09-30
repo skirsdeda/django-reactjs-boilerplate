@@ -2,17 +2,20 @@ require('es6-promise').polyfill();
 var path = require("path")
 var webpack = require('webpack')
 var BundleTracker = require('webpack-bundle-tracker')
+var ExtractTextPlugin = require('extract-text-webpack-plugin')
 
 var ForkCheckerPlugin = require('awesome-typescript-loader').ForkCheckerPlugin
 
+var srcDir = path.resolve(__dirname, './reactjs');
+
 module.exports = {
-  context: path.resolve(__dirname, './reactjs'),
+  context: srcDir,
 
   entry: {
     // Add as many entry points as you have container-react-components here
     SampleApp: './SampleApp',
     SampleApp2: './SampleApp2',
-    vendors: ['react'],
+    //vendors: ['es6-promise', 'isomorphic-fetch', 'lodash', 'react-dom'],
   },
 
   output: {
@@ -26,10 +29,15 @@ module.exports = {
   plugins: [
     new webpack.optimize.CommonsChunkPlugin('vendors', 'vendors.js'),
     new ForkCheckerPlugin(),
+    new ExtractTextPlugin('app.css', {allChunks: true}),
   ], // add all common plugins here
 
   module: {
-    loaders: [] // add all common loaders here
+    loaders: [ // add all common loaders here
+      { test: /\.css$/, loader: ExtractTextPlugin.extract('style', 'css?modules&importLoaders=1&localIdentName=[name]__[local]__[hash:base64:5]')},
+      { test: /\.ts$/, loaders: ['awesome-typescript'] },
+      { test: /\.tsx$/, loaders: ['awesome-typescript'] }
+    ]
   },
 
   resolve: {

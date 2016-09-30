@@ -1,37 +1,39 @@
 var path = require("path")
 var webpack = require('webpack')
+var _ = require('lodash')
 var BundleTracker = require('webpack-bundle-tracker')
-var ExtractTextPlugin = require('extract-text-webpack-plugin')
 
 var config = require('./webpack.base.config.js')
 var localSettings = require('./webpack.local-settings.js')
 
 var ip = localSettings.ip
+var port = localSettings.port
 
 config.devtool = "source-map"
 
-config.ip = ip
+config.ip = ip;
+config.port = port;
 
 // Use webpack dev server
-config.entry = {
+var devServer = 'webpack-dev-server/client?http://' + ip + ':' + port;
+config.entry = _.assign(config.entry, {
   SampleApp: [
-    'webpack-dev-server/client?http://' + ip + ':3000',
+    devServer,
     'webpack/hot/only-dev-server',
     './SampleApp',
   ],
   SampleApp2: [
-    'webpack-dev-server/client?http://' + ip + ':3000',
+    devServer,
     'webpack/hot/only-dev-server',
     './SampleApp2',
   ]
-}
+});
 
 // override django's STATIC_URL for webpack bundles
-config.output.publicPath = 'http://' + ip + ':3000' + '/assets/bundles/'
+config.output.publicPath = 'http://' + ip + ':' + port + '/assets/bundles/'
 
 // Add HotModuleReplacementPlugin and BundleTracker plugins
 config.plugins = config.plugins.concat([
-  new ExtractTextPlugin('app.css', {allChunks: true}),
   new webpack.HotModuleReplacementPlugin(),
   new webpack.NoErrorsPlugin(),
   new BundleTracker({filename: './webpack-stats-local.json'}),
@@ -44,11 +46,9 @@ config.plugins = config.plugins.concat([
 ])
 
 // Add a loader for TSX files
-var srcDir = path.resolve(__dirname, './reactjs')
-config.module.loaders = config.module.loaders.concat([
-  { test: /\.css$/, loader: ExtractTextPlugin.extract('style', 'css?modules&importLoaders=1&localIdentName=[name]__[local]__[hash:base64:5]')},
-  { test: /\.ts$/, include: srcDir, loader: 'awesome-typescript' },
-  { test: /\.tsx$/, include: srcDir, loaders: ['awesome-typescript'/*, 'react-hot'*/] }
-])
+var tsxLoader = _.find(
+  config.module.loaders,
+  function(l) { return l.test.toString() == '/\\.tsx$/'; });
+tsxLoader.loaders = ['react-hot', 'awesome-typescript'];
 
 module.exports = config

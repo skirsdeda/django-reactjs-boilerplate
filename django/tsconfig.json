@@ -1,18 +1,27 @@
 {
     "compilerOptions": {
-        //"outDir": "./assets/bundles/",
         "sourceMap": true,
+        "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
         "noImplicitAny": false,
         "module": "commonjs",
         "target": "es5",
         "jsx": "react"
     },
-    "files": [
-        "./typings/index.d.ts"
+    "exclude": [
+        "node_modules"
+    ],
+    "filesGlob": [
+        "./reactjs/**/*.ts",
+        "./reactjs/**/*.tsx"
     ],
     "awesomeTypescriptLoaderOptions": {
-        //"forkChecker": true,
-        //"useBabel": true
-    }
+        "useCache": true,
+        "resolveGlobs": true,
+        "forkChecker": true,
+        "cacheDirectory": "node_modules/.awesome-typescript-loader-cache"
+    },
+    "compileOnSave": false,
+    "buildOnSave": false,
+    "atom": { "rewriteTsconfig": false }
 }

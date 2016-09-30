@@ -7,10 +7,10 @@ new WebpackDevServer(webpack(config), {
   hot: true,
   inline: true,
   historyApiFallback: true,
-}).listen(3000, config.ip, function (err, result) {
+}).listen(parseInt(config.port), config.ip, function (err, result) {
   if (err) {
-    console.log(err)
+    console.log(err);
   }
 
-  console.log('Listening at ' + config.ip + ':3000')
-})
+  console.log('Listening at ' + config.ip + ':' + config.port);
+});

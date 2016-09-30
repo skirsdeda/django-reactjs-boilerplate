@@ -26,9 +26,4 @@ config.plugins = config.plugins.concat([
   })
 ])
 
-// Add a loader for JSX files
-config.module.loaders.push(
-  { test: /\.tsx?$/, exclude: /node_modules/, loader: 'ts-loader' }
-)
-
 module.exports = config
