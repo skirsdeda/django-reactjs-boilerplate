@@ -15,19 +15,13 @@ config.ip = ip;
 config.port = port;
 
 // Use webpack dev server
-var devServer = 'webpack-dev-server/client?http://' + ip + ':' + port;
-config.entry = _.assign(config.entry, {
-  SampleApp: [
-    devServer,
-    'webpack/hot/only-dev-server',
-    './SampleApp',
-  ],
-  SampleApp2: [
-    devServer,
-    'webpack/hot/only-dev-server',
-    './SampleApp2',
-  ]
-});
+var devServerEntry = [
+  'webpack-dev-server/client?http://' + ip + ':' + port,
+  'webpack/hot/only-dev-server'
+];
+config.entry = _.mapValues(
+  config.entry,
+  function(e) { return _.concat(devServerEntry, e); });
 
 // override django's STATIC_URL for webpack bundles
 config.output.publicPath = 'http://' + ip + ':' + port + '/assets/bundles/'
@@ -48,7 +42,10 @@ config.plugins = config.plugins.concat([
 // Add a loader for TSX files
 var tsxLoader = _.find(
   config.module.loaders,
-  function(l) { return l.test.toString() == '/\\.tsx$/'; });
+  function(l) { return l.test.test('.tsx'); });
 tsxLoader.loaders = ['react-hot', 'awesome-typescript'];
+
+config.module.loaders.push(
+  { test: /\.css$/, loaders: ['style?sourceMap', config.cssModulesLoaderConfig]});
 
 module.exports = config

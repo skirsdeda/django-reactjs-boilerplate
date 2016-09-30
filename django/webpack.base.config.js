@@ -7,6 +7,7 @@ var ExtractTextPlugin = require('extract-text-webpack-plugin')
 var ForkCheckerPlugin = require('awesome-typescript-loader').ForkCheckerPlugin
 
 var srcDir = path.resolve(__dirname, './reactjs');
+var cssModulesLoaderConfig = 'css?modules&importLoaders=1&localIdentName=[name]__[local]__[hash:base64:5]';
 
 module.exports = {
   context: srcDir,
@@ -32,9 +33,10 @@ module.exports = {
     new ExtractTextPlugin('app.css', {allChunks: true}),
   ], // add all common plugins here
 
+  cssModulesLoaderConfig: cssModulesLoaderConfig,
+
   module: {
     loaders: [ // add all common loaders here
-      { test: /\.css$/, loader: ExtractTextPlugin.extract('style', 'css?modules&importLoaders=1&localIdentName=[name]__[local]__[hash:base64:5]')},
       { test: /\.ts$/, loaders: ['awesome-typescript'] },
       { test: /\.tsx$/, loaders: ['awesome-typescript'] }
     ]
