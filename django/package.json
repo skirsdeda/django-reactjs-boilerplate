@@ -27,5 +27,18 @@
     "react-redux": "^4.4.5",
     "redux": "^3.5.2",
     "redux-thunk": "^2.1.0"
+  },
+  "scripts": {
+    "clean:local": "rm -rf djreact/static/bundles/local/*",
+    "clean:stage": "rm -rf djreact/static/bundles/stage/*",
+    "clean:prod": "rm -rf djreact/static/bundles/prod/*",
+    "clean": "npm run clean:local && npm run clean:stage && npm run clean:prod",
+    "prebuild:local": "npm run clean:local",
+    "build:local": "webpack --config webpack.local.config.js --progress --colors",
+    "prebuild:stage": "npm run clean:stage",
+    "build:stage": "webpack --config webpack.stage.config.js --progress --colors",
+    "prebuild:prod": "npm run clean:prod",
+    "build:prod": "webpack --config webpack.prod.config.js --progress --colors",
+    "build": "npm run build:local && npm run build:stage && npm run build:prod"
   }
 }
